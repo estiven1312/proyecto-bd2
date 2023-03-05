@@ -10,8 +10,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface QuejaRepository extends JpaRepository<Queja, Long> {
-    @Query("SELECT queja FROM Queja queja WHERE queja.estado.id = :idPorAtender")
-    public List<Queja> findQuejasPorAtender(@Param("idPorAtender") Long id);
+    @Query("SELECT queja FROM Queja queja WHERE queja.estado.abreviatura = 'ATENDER' AND queja.usuario.id = :idUsuario")
+    public List<Queja> findQuejasPorAtender(@Param("idUsuario") Long idUsuario);
 
     @Procedure(name = "findAllQuejasPorAtender")
     public List<Queja> findQuejasPorAtender();

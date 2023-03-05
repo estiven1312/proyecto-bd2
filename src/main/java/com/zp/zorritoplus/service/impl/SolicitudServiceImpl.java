@@ -4,6 +4,7 @@ import com.zp.zorritoplus.model.domain.Catalogo;
 import com.zp.zorritoplus.model.domain.Plataforma;
 import com.zp.zorritoplus.model.domain.Solicitud;
 import com.zp.zorritoplus.model.domain.Usuario;
+import com.zp.zorritoplus.model.dto.PlataformaDTO;
 import com.zp.zorritoplus.model.dto.SolicitudDTO;
 import com.zp.zorritoplus.model.response.SolicitudResponse;
 import com.zp.zorritoplus.repository.CatalogoRepository;
@@ -20,7 +21,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SolicitudServiceImpl implements SolicitudService {
@@ -70,5 +74,38 @@ public class SolicitudServiceImpl implements SolicitudService {
             solicitudResponse.setMessage("Error al guardar la solicitud");
         }
         return new ResponseEntity<>(solicitudResponse, httpStatus);
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientesByUsuario(Long id) {
+        try {
+            List<SolicitudDTO> solicitudDTOS = solicitudRepository.findSolicitudesPendientes(id).stream().map(SolicitudDTO::new).toList();
+            return new ResponseEntity<>(solicitudDTOS, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientes() {
+        try {
+            List<SolicitudDTO> solicitudDTOS = solicitudRepository.findSolicitudesPendientes().stream().map(SolicitudDTO::new).toList();
+            return new ResponseEntity<>(solicitudDTOS, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<SolicitudResponse> eliminarSolicitud(Long idSolicitud) {
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO) {
+        return null;
     }
 }

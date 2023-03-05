@@ -29,15 +29,8 @@ public class HelloController {
     @GetMapping("/test01")
     @Transactional
     public void test1(){
-        Catalogo catalogo = catalogoRepository.findById(10L).get();
-        LOGGER.info(catalogo.toString());
-        List<Catalogo> catalogoList = catalogoRepository.findAllCatalogosByCursor();
 
-
-        Rol rol = new Rol();
-        rol = rolRepository.rolByStoredProcedure(10L);
-        LOGGER.info(catalogoList.toString());
-        LOGGER.info("=>>>>>>>>" + "  " +rol.toString());
+        LOGGER.info("=>>>>>>>>" + "  " +"TEST 00000000000");
 
     }
 }

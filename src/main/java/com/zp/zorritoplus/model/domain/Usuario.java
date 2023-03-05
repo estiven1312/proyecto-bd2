@@ -1,6 +1,8 @@
 package com.zp.zorritoplus.model.domain;
 
+import com.sun.istack.NotNull;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.List;
@@ -30,6 +32,9 @@ public class Usuario {
     private String dni;
     @Column(name = "CONTRASENIA")
     private String contrasenia;
+    @Type(type= "org.hibernate.type.NumericBooleanType")
+    @Column(name = "ACTIVO", nullable = false)
+    private Boolean Activo ;
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private List<Queja> quejas;
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
