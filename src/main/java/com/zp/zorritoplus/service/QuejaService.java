@@ -8,9 +8,9 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface QuejaService {
-    public ResponseEntity<List<Queja>> obtenerQuejasPorAtender();
+    public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender();
 
-    public ResponseEntity<List<Queja>> obtenerQuejasPorAtender(Long idUsuario);
+    public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender(String usuario);
 
     public ResponseEntity<QuejaResponse> registrarQueja(QuejaDTO quejaDTO);
 
@@ -19,5 +19,7 @@ public interface QuejaService {
     public ResponseEntity<QuejaResponse> eliminarQueja(Long idQueja);
 
     public ResponseEntity<QuejaResponse> editarQueja(QuejaDTO quejaDTO);
+
+    public ResponseEntity<QuejaResponse> eliminarQuejaBD(Long idQueja);
 
 }

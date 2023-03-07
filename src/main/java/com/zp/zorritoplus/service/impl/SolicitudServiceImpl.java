@@ -51,7 +51,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             Date fechaFin = DateUtil.convertStringToDate(solicitudDTO.getFechaFinSolicitud(), DateUtil.FORMAT_DATE_XML);
             Usuario usuario = usuarioRepository.findById(solicitudDTO.getIdUsuario()).orElse(null);
             Plataforma plataforma = plataformaRepository.findById(solicitudDTO.getIdPlataforma()).orElse(null);
-            Catalogo estado = catalogoRepository.findById(610L).orElse(null);
+            Catalogo estado = catalogoRepository.findCatalogoByAbreviatura("ATENDER");
             Solicitud solicitud = new Solicitud();
             solicitud.setUsuario(usuario);
             solicitud.setCodigoPago(solicitudDTO.getCodigoPago());
@@ -83,7 +83,18 @@ public class SolicitudServiceImpl implements SolicitudService {
             List<SolicitudDTO> solicitudDTOS = solicitudRepository.findSolicitudesPendientes(id).stream().map(SolicitudDTO::new).toList();
             return new ResponseEntity<>(solicitudDTOS, HttpStatus.OK);
         }catch (Exception ex){
-            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientesByUsuario(String usuario) {
+        try{
+            Usuario usuarioEntity = usuarioRepository.findUsuarioByCorreo(usuario);
+            List<SolicitudDTO> solicitudDTOS = solicitudRepository.findSolicitudesPendientes(usuarioEntity.getId()).stream().map(SolicitudDTO::new).toList();
+            return new ResponseEntity<>(solicitudDTOS, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -101,11 +112,56 @@ public class SolicitudServiceImpl implements SolicitudService {
     @Override
     @Transactional
     public ResponseEntity<SolicitudResponse> eliminarSolicitud(Long idSolicitud) {
-        return null;
+        SolicitudResponse solicitudResponse = new SolicitudResponse();
+        HttpStatus httpStatus;
+        try {
+            Solicitud solicitud = solicitudRepository.findById(idSolicitud).get();
+            Catalogo estado = catalogoRepository.findCatalogoByAbreviatura("ELIMINADO");
+            solicitud.setEstado(estado);
+            solicitudRepository.save(solicitud);
+            solicitudResponse.setCodigoSolicitud("OK");
+            solicitudResponse.setEstado("200");
+            solicitudResponse.setMessage("Actualizado con exito");
+            httpStatus = HttpStatus.OK;
+
+
+        }catch (Exception ex){
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            solicitudResponse.setCodigoSolicitud("Error");
+            solicitudResponse.setEstado("500");
+            logger.info(ex.getMessage(), ex);
+            solicitudResponse.setMessage("Error al guardar la solicitud");
+        }
+        return new ResponseEntity<>(solicitudResponse, httpStatus);
     }
 
     @Override
     public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO) {
-        return null;
-    }
+        SolicitudResponse solicitudResponse = new SolicitudResponse();
+        HttpStatus httpStatus;
+        try {
+            Date fechaInicio = DateUtil.convertStringToDate(solicitudDTO.getFechaInicioSolicitud(), DateUtil.FORMAT_DATE_XML);
+            Date fechaFin = DateUtil.convertStringToDate(solicitudDTO.getFechaFinSolicitud(), DateUtil.FORMAT_DATE_XML);
+            Usuario usuario = usuarioRepository.findById(solicitudDTO.getIdUsuario()).orElse(null);
+            Plataforma plataforma = plataformaRepository.findById(solicitudDTO.getIdPlataforma()).orElse(null);
+            Solicitud solicitud = solicitudRepository.findById(solicitudDTO.getId()).get();
+            solicitud.setUsuario(usuario);
+            solicitud.setCodigoPago(solicitudDTO.getCodigoPago());
+            solicitud.setPlataforma(plataforma);
+            solicitud.setFechaInicio(fechaInicio);
+            solicitud.setFechaFin(fechaFin);
+            solicitud = solicitudRepository.save(solicitud);
+            httpStatus = HttpStatus.OK;
+            solicitudResponse.setCodigoSolicitud(solicitud.getId().toString());
+            solicitudResponse.setEstado("200");
+            solicitudResponse.setMessage("Solicitud guardada correctamente");
+
+        }catch (Exception ex){
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            solicitudResponse.setCodigoSolicitud("Error");
+            solicitudResponse.setEstado("500");
+            logger.info(ex.getMessage(), ex);
+            solicitudResponse.setMessage("Error al guardar la solicitud");
+        }
+        return new ResponseEntity<>(solicitudResponse, httpStatus);    }
 }

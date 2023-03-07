@@ -6,6 +6,7 @@ import com.zp.zorritoplus.model.dto.AuthRequest;
 import com.zp.zorritoplus.model.dto.UsuarioDTO;
 import com.zp.zorritoplus.model.response.AuthResponse;
 import com.zp.zorritoplus.model.response.ExitoResponse;
+import com.zp.zorritoplus.repository.RolRepository;
 import com.zp.zorritoplus.repository.UsuarioRepository;
 import com.zp.zorritoplus.service.UsuarioService;
 import com.zp.zorritoplus.util.DateUtil;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,18 +30,23 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Autowired
     UsuarioRepository usuarioRepository;
 
+    @Autowired
+    RolRepository rolRepository;
+
     @Override
     @Transactional
     public ResponseEntity<AuthResponse> authenticateUser(AuthRequest authRequest) {
         try {
-            Usuario usuario = usuarioRepository.findByCorreoAndPassword(authRequest.getUser(), authRequest.getPassword());
+            Usuario usuario = usuarioRepository.findByCorreoAndPassword(authRequest.getCorreo(), authRequest.getContrasenia());
             if(usuario == null){
                 throw new Exception("Error al autenticar las credenciales");
             }
             String tokenUsuario = this.getJWTToken(usuario);
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
             AuthResponse response = new AuthResponse();
             response.setCodigo("200");
             response.setToken(tokenUsuario);
+            response.setUsuarioDTO(usuarioDTO);
             String horaMarcada = DateUtil.convertDateToString(new Date(), DateUtil.FORMAT_DATE_HOUR);
             response.setDate(horaMarcada);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -55,19 +62,106 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ExitoResponse> editDatosByUser(UsuarioDTO usuarioDTO) {
-        return null;
+        try{
+            Usuario usuario = usuarioRepository.findById(usuarioDTO.getId()).get();
+            usuario.setNombre(usuarioDTO.getNombre());
+            usuario.setApellido(usuarioDTO.getApellido());
+            usuario.setCelular(usuarioDTO.getCelular());
+            usuario.setCorreo(usuarioDTO.getCorreo());
+            usuario.setDni(usuarioDTO.getDni());
+            usuario.setContrasenia(usuarioDTO.getContrasenia());
+            usuarioRepository.save(usuario);
+            ExitoResponse exitoResponse = new ExitoResponse();
+            exitoResponse.setCodigo("200");
+            exitoResponse.setMensaje("Se guardaron los cambios correctamente");
+            return new ResponseEntity<>(exitoResponse, HttpStatus.OK);
+
+        }catch (Exception ex){
+            ExitoResponse exitoResponse = new ExitoResponse();
+            exitoResponse.setCodigo("500");
+            exitoResponse.setMensaje("No se pudo realizar la operacion, lo sentimos");
+            return new ResponseEntity<>(exitoResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ExitoResponse> registrarUsuario(UsuarioDTO usuarioDTO) {
-        return null;
+        try{
+            Usuario usuario = new Usuario();
+            usuario.setNombre(usuarioDTO.getNombre());
+            usuario.setApellido(usuarioDTO.getApellido());
+            usuario.setCelular(usuarioDTO.getCelular());
+            usuario.setCorreo(usuarioDTO.getCorreo());
+            usuario.setDni(usuarioDTO.getDni());
+            usuario.setContrasenia(usuarioDTO.getContrasenia());
+            usuario.setActivo(true);
+            Rol rol = rolRepository.findByAbreviatura("CLI");
+            usuario.setRol(rol);
+            usuarioRepository.save(usuario);
+            ExitoResponse exitoResponse = new ExitoResponse();
+            exitoResponse.setCodigo("200");
+            exitoResponse.setMensaje("Se registro correctamente");
+            return new ResponseEntity<>(exitoResponse, HttpStatus.OK);
+
+        }catch (Exception ex){
+            ExitoResponse exitoResponse = new ExitoResponse();
+            exitoResponse.setCodigo("500");
+            exitoResponse.setMensaje("No se pudo registrar lo sentimos");
+            return new ResponseEntity<>(exitoResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
-    public ResponseEntity<ExitoResponse> eliminarUsuario(UsuarioDTO usuarioDTO) {
-        return null;
+    @Transactional
+    public ResponseEntity<ExitoResponse> eliminarUsuario(Long idUsuario) {
+        try{
+            Usuario usuario = usuarioRepository.findById(idUsuario).get();
+            usuario.setActivo(false);
+            usuarioRepository.save(usuario);
+            ExitoResponse exitoResponse = new ExitoResponse();
+            exitoResponse.setCodigo("200");
+            exitoResponse.setMensaje("Se elimino correctamente");
+            return new ResponseEntity<>(exitoResponse, HttpStatus.OK);
+        }catch (Exception ex){
+            ExitoResponse exitoResponse = new ExitoResponse();
+            exitoResponse.setCodigo("500");
+            exitoResponse.setMensaje("No se pudo registrar lo sentimos");
+            return new ResponseEntity<>(exitoResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
+    @Override
+    public ResponseEntity<UsuarioDTO> infoUsuario(Long idUsuario) {
+        try {
+            Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
+            return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new UsuarioDTO(), HttpStatus.OK);
+
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<UsuarioDTO>> listaUsuario() {
+        try{
+            List<UsuarioDTO> usuarios = usuarioRepository.findUsuariosActivos().stream().map(UsuarioDTO::new).toList();
+            return new ResponseEntity<>(usuarios, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Usuario findUsuario(String correo) {
+        return this.usuarioRepository.findUsuarioByCorreo(correo);
+    }
+
     private String getJWTToken(Usuario usuario) {
         String secretKey = "mySecretKey";
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils

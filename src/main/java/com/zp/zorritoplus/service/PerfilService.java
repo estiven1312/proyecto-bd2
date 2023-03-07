@@ -10,4 +10,5 @@ public interface PerfilService {
     public ResponseEntity<ExitoResponse> aprobarSolicitud(PerfilDTO perfilDTO);
     public ResponseEntity<List<PerfilDTO>> listaPerfiles();
     public ResponseEntity<ExitoResponse> eliminarPerfil(Long id);
+    public ResponseEntity<List<PerfilDTO>> listarPerfilesByUser(String correo);
 }

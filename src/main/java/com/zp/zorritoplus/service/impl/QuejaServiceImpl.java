@@ -35,9 +35,9 @@ public class QuejaServiceImpl implements QuejaService {
     QuejaRepository quejaRepository;
 
     @Override
-    public ResponseEntity<List<Queja>> obtenerQuejasPorAtender() {
+    public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender() {
         try {
-            List<Queja> quejas = this.quejaRepository.findQuejasPorAtender();
+            List<QuejaDTO> quejas = this.quejaRepository.findQuejasPorAtender().stream().map(QuejaDTO::new).toList();
             return new ResponseEntity<>(quejas, HttpStatus.OK);
         }catch (Exception ex){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -45,9 +45,9 @@ public class QuejaServiceImpl implements QuejaService {
     }
 
     @Override
-    public ResponseEntity<List<Queja>> obtenerQuejasPorAtender(Long idUsuario) {
+    public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender(String usuario) {
         try {
-            List<Queja> quejas = this.quejaRepository.findQuejasPorAtender(idUsuario);
+            List<QuejaDTO> quejas = this.quejaRepository.findQuejasPorAtender(usuario).stream().map(QuejaDTO::new).toList();
             return new ResponseEntity<>(quejas, HttpStatus.OK);
         }catch (Exception ex){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -143,5 +143,24 @@ public class QuejaServiceImpl implements QuejaService {
             quejaResponse.setMensaje("Error al editar");
             return new ResponseEntity<>(quejaResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<QuejaResponse> eliminarQuejaBD(Long idQueja) {
+        try {
+            Queja queja = quejaRepository.findById(idQueja).orElse(null);
+            quejaRepository.delete(queja);
+            QuejaResponse quejaResponse = new QuejaResponse();
+            quejaResponse.setMensaje("Se elimino correctamente");
+            quejaResponse.setCodigo("200");
+            return new ResponseEntity<>(quejaResponse, HttpStatus.OK);
+        } catch (Exception ex){
+            QuejaResponse quejaResponse = new QuejaResponse();
+            quejaResponse.setCodigo("500");
+            quejaResponse.setMensaje("Error al eliminar, lo sentimos");
+            return new ResponseEntity<>(quejaResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 }

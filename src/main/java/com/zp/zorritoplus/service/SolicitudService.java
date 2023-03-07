@@ -10,6 +10,7 @@ public interface SolicitudService {
 
     public ResponseEntity<SolicitudResponse> registrarSolicitud(SolicitudDTO solicitudDTO);
     public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientesByUsuario(Long id);
+    public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientesByUsuario(String usuario);
     public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientes();
     public ResponseEntity<SolicitudResponse> eliminarSolicitud(Long idSolicitud);
     public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO);

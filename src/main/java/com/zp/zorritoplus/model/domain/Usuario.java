@@ -34,7 +34,7 @@ public class Usuario {
     private String contrasenia;
     @Type(type= "org.hibernate.type.NumericBooleanType")
     @Column(name = "ACTIVO", nullable = false)
-    private Boolean Activo ;
+    private Boolean activo ;
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private List<Queja> quejas;
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
