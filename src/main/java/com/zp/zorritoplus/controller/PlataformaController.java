@@ -2,13 +2,12 @@ package com.zp.zorritoplus.controller;
 
 import com.zp.zorritoplus.model.domain.Plataforma;
 import com.zp.zorritoplus.model.dto.PlataformaDTO;
+import com.zp.zorritoplus.model.response.ExitoResponse;
 import com.zp.zorritoplus.service.PlataformaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,5 +25,17 @@ public class PlataformaController {
         }catch (Exception ex){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
+    }
+    @PostMapping("/registrar")
+    public ResponseEntity<ExitoResponse> registarPlataforma(@RequestBody PlataformaDTO plataformaDTO){
+        return plataformaService.registrarNuevaPlataforma(plataformaDTO);
+    }
+    @PostMapping("/editar")
+    public ResponseEntity<ExitoResponse> editarPlataforma(@RequestBody PlataformaDTO plataformaDTO){
+        return plataformaService.editarPlataforma(plataformaDTO);
+    }
+    @GetMapping("/eliminar/{id}")
+    public ResponseEntity<ExitoResponse> eliminarPlataforma(@PathVariable Long id){
+        return plataformaService.eliminarPlataforma(id);
     }
 }

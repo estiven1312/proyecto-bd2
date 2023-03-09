@@ -224,3 +224,110 @@ BEGIN
     end loop;
     close queja_cursor;
 end;
+
+
+
+CREATE VIEW reporte_solicitudes AS
+SELECT
+    s.solicitud_id      AS "ID_SOLICITUD",
+    u.nombre
+        || ' '
+        || u.apellido       AS "NOMBRE_USUARIO",
+    u.correo            AS "CORREO_USUARIO",
+    p.nombre_plataforma AS "PLATAFORMA",
+    c.abreviatura       AS "ESTADO"
+FROM
+    solicitud s
+        INNER JOIN usuario    u ON u.usuario_id = s.usuario_id
+        INNER JOIN plataforma p ON p.plataforma_id = s.plataforma_id
+        INNER JOIN catalogo   c ON c.catalogo_id = s.estado_catalogo_id;
+
+
+CREATE VIEW reporte_perfiles AS
+SELECT
+    s.solicitud_id      AS "ID_SOLICITUD",
+    u.nombre
+        || ' '
+        || u.apellido       AS "NOMBRE_USUARIO",
+    u.correo            AS "CORREO_USUARIO",
+    p.nombre_plataforma AS "PLATAFORMA",
+    c.abreviatura       AS "ESTADO"
+FROM
+    solicitud s
+        INNER JOIN usuario    u ON u.usuario_id = s.usuario_id
+        INNER JOIN plataforma p ON p.plataforma_id = s.plataforma_id
+        INNER JOIN catalogo   c ON c.catalogo_id = s.estado_catalogo_id;
+
+
+
+CREATE OR REPLACE PROCEDURE sp_find_solicitudes_por_atender (
+    solicitud_cursor OUT SYS_REFCURSOR
+) IS
+BEGIN
+OPEN solicitud_cursor FOR SELECT * FROM reporte_solicitudes WHERE estado = 'ATENDER';
+END;
+
+
+
+
+CREATE VIEW reporte_perfil AS
+SELECT
+    p.perfil_id     AS "PERFIL_ID",
+    p.nombre_perfil AS "NOMBRE_PERFIL",
+    p.correo_perfil AS "CORREO_PERFIL",
+    u.correo        AS "CORREO_USUARIO",
+    s.fecha_inicio  AS "INICIO",
+    s.fecha_fin     AS "FIN",
+    c.abreviatura   AS "ESTADO"
+FROM
+    perfil p
+        INNER JOIN solicitud s ON p.solicitud_id = s.solicitud_id
+        INNER JOIN usuario   u ON s.usuario_id = u.usuario_id
+        INNER JOIN catalogo  c ON c.catalogo_id = p.estado_catalogo_id;
+
+CREATE OR REPLACE FUNCTION fn_getperfilessolicitudes RETURN SYS_REFCURSOR AS
+    cursor_perfiles SYS_REFCURSOR;
+BEGIN
+OPEN cursor_perfiles
+    FOR
+SELECT
+    *
+FROM
+    reporte_perfil;
+
+RETURN cursor_perfiles;
+END;
+
+
+
+CREATE OR REPLACE PROCEDURE SP_ACTUALIZAR_ESTADO_PERFILES IS
+    CURSOR CURSOR_PERFIL_VENCIDO IS SELECT P.PERFIL_ID, P.NOMBRE_PERFIL, P.CORREO_PERFIL FROM PERFIL P INNER JOIN SOLICITUD S ON P.SOLICITUD_ID = S.SOLICITUD_ID WHERE S.FECHA_FIN<SYSDATE;
+BEGIN
+FOR PERF IN CURSOR_PERFIL_VENCIDO LOOP
+UPDATE PERFIL SET perfil.estado_catalogo_id = 30 where perf.PERFIL_ID = perfil.perfil_id;
+END LOOP;
+COMMIT;
+END;
+
+
+
+grant create any job to ZP_PORTAL;
+
+
+BEGIN
+  SYS.DBMS_SCHEDULER.CREATE_JOB
+(
+       job_name        => 'ZP_PORTAL.JOB_ACTUALIZAR_ESTADO_PERFILES'
+      ,job_type        => 'PLSQL_BLOCK'
+      ,start_date      => TO_TIMESTAMP_TZ('3/09/2023 2:00:00.000 AM -05:00','mm/dd/yyyy hh12:mi:ss.ff AM tzr')
+      ,repeat_interval => 'freq=hourly; byminute=0; bysecond=0;'
+      ,auto_drop       => TRUE
+      ,job_action      => '
+                            BEGIN
+                                ZP_PORTAL.SP_ACTUALIZAR_ESTADO_PERFILES;
+                            END;
+                          '
+      ,comments        => 'Job que actualiza el estado de los perfiles'
+      ,enabled         => TRUE
+    );
+END;

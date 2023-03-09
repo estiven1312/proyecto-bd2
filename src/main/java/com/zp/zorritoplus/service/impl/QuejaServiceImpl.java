@@ -35,6 +35,7 @@ public class QuejaServiceImpl implements QuejaService {
     QuejaRepository quejaRepository;
 
     @Override
+    @Transactional
     public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender() {
         try {
             List<QuejaDTO> quejas = this.quejaRepository.findQuejasPorAtender().stream().map(QuejaDTO::new).toList();
@@ -45,6 +46,7 @@ public class QuejaServiceImpl implements QuejaService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender(String usuario) {
         try {
             List<QuejaDTO> quejas = this.quejaRepository.findQuejasPorAtender(usuario).stream().map(QuejaDTO::new).toList();
@@ -56,11 +58,11 @@ public class QuejaServiceImpl implements QuejaService {
 
     @Override
     @Transactional
-    public ResponseEntity<QuejaResponse> registrarQueja(QuejaDTO quejaDTO) {
+    public ResponseEntity<QuejaResponse> registrarQueja(QuejaDTO quejaDTO, String usuarioCorreo) {
         HttpStatus httpStatus;
         QuejaResponse quejaResponse = new QuejaResponse();
         try{
-            Usuario usuario = usuarioRepository.findById(quejaDTO.getIdUsuario()).get();
+            Usuario usuario = usuarioRepository.findUsuarioByCorreo(usuarioCorreo);
             TipoQueja tipoQueja = tipoQuejaRepository.findById(quejaDTO.getIdTipoQueja()).get();
             Catalogo catalogo = catalogoRepository.findById(10L).get();
             Queja queja = new Queja();
@@ -87,7 +89,7 @@ public class QuejaServiceImpl implements QuejaService {
         QuejaResponse quejaResponse = new QuejaResponse();
         try {
             Queja queja = quejaRepository.findById(idQueja).orElse(null);
-            Catalogo estado = catalogoRepository.findById(20L).orElse(null);
+            Catalogo estado = catalogoRepository.findCatalogoByAbreviatura("ATENDIDO");
             queja.setEstado(estado);
             quejaRepository.save(queja);
             quejaResponse.setMensaje("Se actualizó el estado de la queja correctamente");
@@ -101,6 +103,15 @@ public class QuejaServiceImpl implements QuejaService {
         }
 
         return new ResponseEntity<>(quejaResponse, httpStatus);
+    }
+
+    @Override
+    public ResponseEntity<List<TipoQueja>> getTipoQueja() {
+        try {
+            return new ResponseEntity<>(tipoQuejaRepository.findAll(), HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

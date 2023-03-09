@@ -75,7 +75,41 @@ public class SolicitudServiceImpl implements SolicitudService {
         }
         return new ResponseEntity<>(solicitudResponse, httpStatus);
     }
+    @Override
+    @Transactional
+    public ResponseEntity<SolicitudResponse> registrarSolicitud(SolicitudDTO solicitudDTO, String correoUsuario) {
+        SolicitudResponse solicitudResponse = new SolicitudResponse();
+        HttpStatus httpStatus;
+        try {
+            Date fechaSolicitud = new Date();
+            Date fechaInicio = DateUtil.convertStringToDate(solicitudDTO.getFechaInicioSolicitud(), DateUtil.FORMAT_DATE_XML);
+            Date fechaFin = DateUtil.convertStringToDate(solicitudDTO.getFechaFinSolicitud(), DateUtil.FORMAT_DATE_XML);
+            Usuario usuario = usuarioRepository.findUsuarioByCorreo(correoUsuario);
+            Plataforma plataforma = plataformaRepository.findById(solicitudDTO.getIdPlataforma()).orElse(null);
+            Catalogo estado = catalogoRepository.findCatalogoByAbreviatura("ATENDER");
+            Solicitud solicitud = new Solicitud();
+            solicitud.setUsuario(usuario);
+            solicitud.setCodigoPago(solicitudDTO.getCodigoPago());
+            solicitud.setEstado(estado);
+            solicitud.setPlataforma(plataforma);
+            solicitud.setFechaSolicitud(fechaSolicitud);
+            solicitud.setFechaInicio(fechaInicio);
+            solicitud.setFechaFin(fechaFin);
+            solicitud = solicitudRepository.save(solicitud);
+            httpStatus = HttpStatus.OK;
+            solicitudResponse.setCodigoSolicitud(solicitud.getId().toString());
+            solicitudResponse.setEstado("200");
+            solicitudResponse.setMessage("Solicitud guardada correctamente");
 
+        }catch (Exception ex){
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+            solicitudResponse.setCodigoSolicitud("Error");
+            solicitudResponse.setEstado("500");
+            logger.info(ex.getMessage(), ex);
+            solicitudResponse.setMessage("Error al guardar la solicitud");
+        }
+        return new ResponseEntity<>(solicitudResponse, httpStatus);
+    }
     @Override
     @Transactional
     public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientesByUsuario(Long id) {
@@ -121,7 +155,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             solicitudRepository.save(solicitud);
             solicitudResponse.setCodigoSolicitud("OK");
             solicitudResponse.setEstado("200");
-            solicitudResponse.setMessage("Actualizado con exito");
+            solicitudResponse.setMessage("Eliminada con exito");
             httpStatus = HttpStatus.OK;
 
 
@@ -136,13 +170,13 @@ public class SolicitudServiceImpl implements SolicitudService {
     }
 
     @Override
-    public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO) {
+    public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO, String correo) {
         SolicitudResponse solicitudResponse = new SolicitudResponse();
         HttpStatus httpStatus;
         try {
             Date fechaInicio = DateUtil.convertStringToDate(solicitudDTO.getFechaInicioSolicitud(), DateUtil.FORMAT_DATE_XML);
             Date fechaFin = DateUtil.convertStringToDate(solicitudDTO.getFechaFinSolicitud(), DateUtil.FORMAT_DATE_XML);
-            Usuario usuario = usuarioRepository.findById(solicitudDTO.getIdUsuario()).orElse(null);
+            Usuario usuario = usuarioRepository.findUsuarioByCorreo(correo);
             Plataforma plataforma = plataformaRepository.findById(solicitudDTO.getIdPlataforma()).orElse(null);
             Solicitud solicitud = solicitudRepository.findById(solicitudDTO.getId()).get();
             solicitud.setUsuario(usuario);

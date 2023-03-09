@@ -5,12 +5,15 @@ import com.zp.zorritoplus.model.domain.Queja;
 import com.zp.zorritoplus.model.domain.TipoQueja;
 import com.zp.zorritoplus.model.domain.Usuario;
 import com.zp.zorritoplus.service.QuejaService;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-
+@AllArgsConstructor
+@NoArgsConstructor
 public @Data class QuejaDTO {
     private Long id;
     private String comentario;

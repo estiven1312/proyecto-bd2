@@ -12,9 +12,12 @@ import com.zp.zorritoplus.service.PerfilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
-
+@Service
 public class PerfilServiceImpl implements PerfilService {
     @Autowired
     SolicitudRepository solicitudRepository;
@@ -23,6 +26,7 @@ public class PerfilServiceImpl implements PerfilService {
     @Autowired
     CatalogoRepository catalogoRepository;
     @Override
+    @Transactional
     public ResponseEntity<ExitoResponse> aprobarSolicitud(PerfilDTO perfilDTO) {
         try {
             Solicitud solicitud = solicitudRepository.findById(perfilDTO.getIdSolicitud()).get();
@@ -30,10 +34,15 @@ public class PerfilServiceImpl implements PerfilService {
             perfil.setPinPerfil(perfilDTO.getPinPerfil());
             perfil.setCorreoPerfil(perfilDTO.getCorreoPerfil());
             perfil.setContraseniaPerfil(perfilDTO.getContraseniaPerfil());
+            perfil.setNombrePerfil(perfilDTO.getNombrePerfil());
             perfil.setSolicitud(solicitud);
             Catalogo estado = catalogoRepository.findCatalogoByAbreviatura("ACTIVO");
+            Catalogo estadoSolicitud = catalogoRepository.findCatalogoByAbreviatura("ATENDIDO");
+
             perfil.setNombrePerfil(perfilDTO.getNombrePerfil());
             perfil.setEstado(estado);
+            solicitud.setEstado(estadoSolicitud);
+            solicitudRepository.save(solicitud);
             perfilRepository.save(perfil);
             ExitoResponse response = new ExitoResponse();
             response.setMensaje("Se aprobo el perfil correctamente");
@@ -48,17 +57,61 @@ public class PerfilServiceImpl implements PerfilService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<List<PerfilDTO>> listaPerfiles() {
-        return null;
+        try {
+            List<PerfilDTO> perfilDTOS = perfilRepository.findPerfilActivo().stream().map(PerfilDTO::new).toList();
+            return new ResponseEntity<>(perfilDTOS, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ExitoResponse> eliminarPerfil(Long id) {
-        return null;
+        try{
+            Catalogo estado = catalogoRepository.findCatalogoByAbreviatura("ELIMINADO");
+            Perfil perfil = perfilRepository.findById(id).get();
+            perfil.setEstado(estado);
+            perfilRepository.save(perfil);
+            ExitoResponse response = new ExitoResponse();
+            response.setCodigo("200");
+            response.setMensaje("Eliminado con exito");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception ex){
+            ExitoResponse response = new ExitoResponse();
+            response.setCodigo("500");
+            response.setMensaje("Fallo al eliminar");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override
+    @Transactional
+    public ResponseEntity<ExitoResponse> eliminarPerfilBD(Long id) {
+        try{
+            perfilRepository.deleteById(id);
+            ExitoResponse response = new ExitoResponse();
+            response.setCodigo("200");
+            response.setMensaje("Eliminado con exito");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception ex){
+            ExitoResponse response = new ExitoResponse();
+            response.setCodigo("500");
+            response.setMensaje("Fallo al eliminar");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    @Transactional
     public ResponseEntity<List<PerfilDTO>> listarPerfilesByUser(String correo) {
-        return null;
+        try {
+            List<PerfilDTO> perfilDTOS = perfilRepository.findPerfilByUsuario(correo).stream().map(PerfilDTO::new).toList();
+            return new ResponseEntity<>(perfilDTOS, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
     }
 }

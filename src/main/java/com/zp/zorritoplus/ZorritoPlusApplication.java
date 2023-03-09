@@ -42,7 +42,7 @@ public class ZorritoPlusApplication {
 			http.cors().and().csrf().disable()
 					.addFilterAfter(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class)
 					.authorizeRequests()
-					.antMatchers(HttpMethod.POST, "/login").permitAll()
+					.antMatchers( "/login", "/usuario/registrar").permitAll()
 					.anyRequest().authenticated();
 		}
 	}

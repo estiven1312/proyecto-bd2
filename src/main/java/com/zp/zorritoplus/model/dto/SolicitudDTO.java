@@ -2,8 +2,12 @@ package com.zp.zorritoplus.model.dto;
 
 import com.zp.zorritoplus.model.domain.Solicitud;
 import com.zp.zorritoplus.util.DateUtil;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public @Data class SolicitudDTO {
     private Long id;
     private String usuario;

@@ -13,5 +13,6 @@ public interface SolicitudService {
     public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientesByUsuario(String usuario);
     public ResponseEntity<List<SolicitudDTO>> listarSolicitudesPendientes();
     public ResponseEntity<SolicitudResponse> eliminarSolicitud(Long idSolicitud);
-    public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO);
+    public ResponseEntity<SolicitudResponse> modificarSolicitud(SolicitudDTO solicitudDTO, String correo);
+    public ResponseEntity<SolicitudResponse> registrarSolicitud(SolicitudDTO solicitudDTO, String correoUsuario);
 }

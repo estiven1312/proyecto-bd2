@@ -1,6 +1,7 @@
 package com.zp.zorritoplus.service;
 
 import com.zp.zorritoplus.model.domain.Queja;
+import com.zp.zorritoplus.model.domain.TipoQueja;
 import com.zp.zorritoplus.model.dto.QuejaDTO;
 import com.zp.zorritoplus.model.response.QuejaResponse;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,11 @@ public interface QuejaService {
 
     public ResponseEntity<List<QuejaDTO>> obtenerQuejasPorAtender(String usuario);
 
-    public ResponseEntity<QuejaResponse> registrarQueja(QuejaDTO quejaDTO);
+    public ResponseEntity<QuejaResponse> registrarQueja(QuejaDTO quejaDTO, String usuarioCorreo) ;
 
     public  ResponseEntity<QuejaResponse>  atenderQueja(Long idQueja);
+    public  ResponseEntity<List<TipoQueja>>  getTipoQueja();
+
 
     public ResponseEntity<QuejaResponse> eliminarQueja(Long idQueja);
 

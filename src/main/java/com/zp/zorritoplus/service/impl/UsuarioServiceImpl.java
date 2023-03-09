@@ -134,6 +134,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ResponseEntity<UsuarioDTO> infoUsuario(Long idUsuario) {
         try {
             Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
