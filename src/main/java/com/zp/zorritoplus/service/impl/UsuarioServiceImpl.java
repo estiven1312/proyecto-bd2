@@ -145,7 +145,18 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         }
     }
+    @Override
+    @Transactional(readOnly = true)
+    public ResponseEntity<UsuarioDTO> infoUsuario(String idUsuario) {
+        try {
+            Usuario usuario = usuarioRepository.findUsuarioByCorreo(idUsuario);
+            UsuarioDTO usuarioDTO = new UsuarioDTO(usuario);
+            return new ResponseEntity<>(usuarioDTO, HttpStatus.OK);
+        }catch (Exception ex){
+            return new ResponseEntity<>(new UsuarioDTO(), HttpStatus.OK);
 
+        }
+    }
     @Override
     @Transactional(readOnly = true)
     public ResponseEntity<List<UsuarioDTO>> listaUsuario() {

@@ -11,8 +11,7 @@ import javax.persistence.*;
 
 public class Plataforma {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "plataformaSeq")
-    @SequenceGenerator(name = "plataformaSeq", sequenceName = "PLATAFORMA_SEQ", schema = "ZP_PORTAL", allocationSize = 10, initialValue = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "plataforma_id")
     private Long id;
     @Column(name = "nombre_plataforma")

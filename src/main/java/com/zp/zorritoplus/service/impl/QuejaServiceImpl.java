@@ -64,7 +64,7 @@ public class QuejaServiceImpl implements QuejaService {
         try{
             Usuario usuario = usuarioRepository.findUsuarioByCorreo(usuarioCorreo);
             TipoQueja tipoQueja = tipoQuejaRepository.findById(quejaDTO.getIdTipoQueja()).get();
-            Catalogo catalogo = catalogoRepository.findById(10L).get();
+            Catalogo catalogo = catalogoRepository.findCatalogoByAbreviatura("ATENDER");
             Queja queja = new Queja();
             queja.setTipoQueja(tipoQueja);
             queja.setEstado(catalogo);

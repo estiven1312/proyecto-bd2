@@ -10,8 +10,7 @@ import java.util.Date;
 @Data
 public class Solicitud {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "solicitudSeq")
-    @SequenceGenerator(name = "solicitudSeq", sequenceName = "SOLICITUD_SEQ", schema = "ZP_PORTAL", allocationSize = 10, initialValue = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SOLICITUD_ID")
     private Long id;
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

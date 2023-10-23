@@ -1,5 +1,6 @@
 package com.zp.zorritoplus.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
 import lombok.Data;
 import org.hibernate.annotations.Type;
@@ -13,8 +14,7 @@ import java.util.List;
 
 public class Usuario {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "usuarioSeq")
-    @SequenceGenerator(name = "usuarioSeq", sequenceName = "USUARIO_SEQ", schema = "ZP_PORTAL", allocationSize = 10, initialValue = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "USUARIO_ID")
     private Long id;
     @ManyToOne(optional = false, fetch = FetchType.EAGER)

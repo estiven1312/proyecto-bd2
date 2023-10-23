@@ -9,8 +9,7 @@ import javax.persistence.*;
 @Data
 public class Perfil {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "perfilSeq")
-    @SequenceGenerator(name = "perfilSeq", sequenceName = "PERFIL_SEQ", schema = "ZP_PORTAL", allocationSize = 10, initialValue = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PERFIL_ID")
     private Long id;
     @Column(name = "NOMBRE_PERFIL")

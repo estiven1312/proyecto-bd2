@@ -15,8 +15,7 @@ import javax.persistence.*;
 @Data
 public class Queja {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "quejaSeq")
-    @SequenceGenerator(name = "quejaSeq", sequenceName = "QUEJA_SEQ", schema = "ZP_PORTAL", allocationSize = 10, initialValue = 10)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "QUEJA_ID")
     private Long id;
     private String comentario;
